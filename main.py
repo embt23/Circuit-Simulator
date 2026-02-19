@@ -63,7 +63,7 @@ class state:
 globalState = state()
 
 #Handle button use
-buttons = [UI.wireButton, UI.voltage_sourceButton, UI.resistorButton, UI.capacitorButton, UI.startStopButton]
+buttons = [UI.wireButton, UI.voltage_sourceButton, UI.resistorButton, UI.capacitorButton, UI.inductorButton, UI.startStopButton]
 buttonPressedBefore = 0  # State to check if a button was pressed before
 
 ################################################################################################
@@ -119,7 +119,7 @@ while running:
                                 placementState = 1
                                 globalState.component = "capacitor"
 
-                        elif b == UI.capacitorButton:
+                        elif b == UI.inductorButton:
                             if globalState.component == "inductor":
                                 placementState = 0
                                 globalState.component = None
