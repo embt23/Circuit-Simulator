@@ -117,7 +117,7 @@ def place_component(component_type, x1, y1, x2, y2):
 #        KirchoffCurrent = KirchoffVoltage
 #    print("Current laws:", KirchoffCurrent)
 #    print("JunctionConnections:", JunctionConnections)
-    
+
     if (globalKirchoffVoltage is not None):
         solution = solve(globalKirchoffVoltage)
 
@@ -126,8 +126,10 @@ def manage_voltage_law():
     componentConnections = []
     print("storeConnectionsAtPoints", storeConnectionsAtPoints)
     #Find the point for which the loope will be created
+    a = False
     for i, point in enumerate(storeConnectionsAtPoints):
-        if len(storeConnectionsAtPoints[i]) > 1:
+        if len(storeConnectionsAtPoints[i]) > 2:
+            a = True
             if storeConnectionsAtPoints[i][0][1] == 0:
                 componentConnections.append((storeConnectionsAtPoints[i][0][0], 1))
             else:
@@ -139,8 +141,41 @@ def manage_voltage_law():
                             nodesExplored.append(k)
                             nodesExplored.append(i)
             break
-        if i == len(storePointCoordinates) - 1:
-            return
+        else:
+            if len(storeConnectionsAtPoints[i]) > 1:
+                a = True
+                if storeConnectionsAtPoints[i][0][1] == 0:
+                    componentConnections.append((storeConnectionsAtPoints[i][0][0], 1))
+                else:
+                    componentConnections.append((storeConnectionsAtPoints[i][0][0], 0))
+                for k, nothing in enumerate(storeConnectionsAtPoints):
+                    if k != i:
+                        for w, nothing2 in enumerate(storeConnectionsAtPoints[k]):
+                            if storeConnectionsAtPoints[k][w][0] == storeConnectionsAtPoints[i][0][0]:
+                                nodesExplored.append(k)
+                                nodesExplored.append(i)
+                break
+            if i == len(storePointCoordinates) - 1:
+                return
+
+    if a == False:
+        for i, point in enumerate(storeConnectionsAtPoints):
+            if len(storeConnectionsAtPoints[i]) > 2:
+                a = True
+                if storeConnectionsAtPoints[i][0][1] == 0:
+                    componentConnections.append((storeConnectionsAtPoints[i][0][0], 1))
+                else:
+                    componentConnections.append((storeConnectionsAtPoints[i][0][0], 0))
+                for k, nothing in enumerate(storeConnectionsAtPoints):
+                    if k != i: 
+                        for w, nothing2 in enumerate(storeConnectionsAtPoints[k]):
+                            if storeConnectionsAtPoints[k][w][0] == storeConnectionsAtPoints[i][0][0]:
+                                nodesExplored.append(k)
+                                nodesExplored.append(i)
+                break
+            if i == len(storePointCoordinates) - 1:
+                return
+    
     
     print("Nodes Explored", nodesExplored)
     print("componentConnections", componentConnections)
@@ -198,71 +233,71 @@ def create_loops(nodesExploredInternal, firstComponent, orientation, componentCo
                          
 
 
-def manage_current_law():
-    CurrentLists = []
-    MainNodes = []
-    MainNodeConnections = []
-    JunctionConnections = []
+#def manage_current_law():
+#    CurrentLists = []
+#    MainNodes = []
+#    MainNodeConnections = []
+#    JunctionConnections = []
 
-    if len(storeConnectionsAtPoints) < 3:
-        return None, None
+#    if len(storeConnectionsAtPoints) < 3:
+#        return None, None
 
-    for point, pointConnections in enumerate(storeConnectionReference):
-        if len(pointConnections) > 2:
-            MainNodes.append(point)
-            MainNodeConnections.append(pointConnections)
+#    for point, pointConnections in enumerate(storeConnectionReference):
+#        if len(pointConnections) > 2:
+#            MainNodes.append(point)
+#            MainNodeConnections.append(pointConnections)
 
-    if not MainNodes:
-        for p, point in enumerate(storeConnectionReference):
-            if len(point) == 1:
-                print("point : ", point)
-                CurrentLists.append(iPathfind(p, 0))
-                return CurrentLists, None
-        return None, None
-    else:
-        for m, main in enumerate(MainNodeConnections):
-            JunctionHold = []
-            for i in range(len(main)):
-                CurrentPath = iPathfind(MainNodes[m], i)
-                print("Current Path", CurrentPath)
-                p = False
-                for v, w in enumerate(CurrentLists):
-                    print("w[0]", w[0], "CurrentPath[len(CurrentPath) - 1]", CurrentPath[len(CurrentPath) - 1])
+ #   if not MainNodes:
+ #       for p, point in enumerate(storeConnectionReference):
+ #           if len(point) == 1:
+ #               print("point : ", point)
+ #               CurrentLists.append(iPathfind(p, 0))
+ #               return CurrentLists, None
+ #       return None, None
+ #   else:
+ #       for m, main in enumerate(MainNodeConnections):
+ #           JunctionHold = []
+ #           for i in range(len(main)):
+ #               CurrentPath = iPathfind(MainNodes[m], i)
+ #               print("Current Path", CurrentPath)
+ #               p = False
+ #               for v, w in enumerate(CurrentLists):
+ #                   print("w[0]", w[0], "CurrentPath[len(CurrentPath) - 1]", CurrentPath[len(CurrentPath) - 1])
 
-                    if CurrentPath[len(CurrentPath) - 1][0] == w[0][0]:
-                        p = True
-                        JunctionHold.append((v, 1))
-                if p == False:
-                    CurrentLists.append(CurrentPath)
-                    JunctionHold.append(((len(CurrentLists) - 1), 0))
-            JunctionConnections.append(JunctionHold)
-
-
-    return CurrentLists, JunctionConnections 
+#                    if CurrentPath[len(CurrentPath) - 1][0] == w[0][0]:
+#                        p = True
+#                        JunctionHold.append((v, 1))
+#                if p == False:
+#                    CurrentLists.append(CurrentPath)
+#                    JunctionHold.append(((len(CurrentLists) - 1), 0))
+#            JunctionConnections.append(JunctionHold)
 
 
+#    return CurrentLists, JunctionConnections 
 
 
 
-def iPathfind(startPoint, direction):
-    iPath = []
-    p = False
-    while p == False:
-        if len(storeConnectionReference[storeConnectionReference[startPoint][direction]]) > 2:
-            p = True
-            iPath.append(storeConnectionsAtPoints[startPoint][direction])
-        elif len(storeConnectionReference[storeConnectionReference[startPoint][direction]]) == 1:
-            p = True
-            iPath.append(storeConnectionsAtPoints[startPoint][direction])
-        else:
-            iPath.append(storeConnectionsAtPoints[startPoint][direction])
-            if storeConnectionReference[storeConnectionReference[startPoint][direction]][0] == startPoint:
-                startPoint = storeConnectionReference[startPoint][direction]
-                direction = 1
-            else:
-                startPoint = storeConnectionReference[startPoint][direction]
-                direction = 0
-    return iPath
+
+
+#def iPathfind(startPoint, direction):
+#    iPath = []
+#    p = False
+#    while p == False:
+#        if len(storeConnectionReference[storeConnectionReference[startPoint][direction]]) > 2:
+#            p = True
+#            iPath.append(storeConnectionsAtPoints[startPoint][direction])
+#        elif len(storeConnectionReference[storeConnectionReference[startPoint][direction]]) == 1:
+#            p = True
+#            iPath.append(storeConnectionsAtPoints[startPoint][direction])
+#        else:
+#            iPath.append(storeConnectionsAtPoints[startPoint][direction])
+#            if storeConnectionReference[storeConnectionReference[startPoint][direction]][0] == startPoint:
+#                startPoint = storeConnectionReference[startPoint][direction]
+#                direction = 1
+#            else:
+#                startPoint = storeConnectionReference[startPoint][direction]
+#                direction = 0
+#    return iPath
 
 def extSolve():
     print("globalKirchoffVoltage", globalKirchoffVoltage)
@@ -273,15 +308,28 @@ def solve(KirchoffVoltage):
     MatrixLength = 2 * len(components)
     A = []
     B = []
-    for x in KirchoffVoltage:
-        hold = [0] * MatrixLength
-        for y in x:
-            if y[1] == 0:
-                hold[2 * y[0]] = 1
-            else:
-                hold[2 * y[0]] = -1
-        A.append(hold)
-        B.append(0)
+
+    store = []
+    for w, x in enumerate(KirchoffVoltage):
+        add = False
+        if w == 0:
+            add = True
+            for i in x:
+                store.append(i[0])
+        else:
+            for i in x:
+                if i[0] not in hold:
+                    add = True
+                    store.append(i[0])
+        if add == True:
+            hold = [0] * MatrixLength
+            for i in x:
+                if i[1] == 0:
+                    hold[2 * i[0]] = 1
+                else:
+                    hold[2 * i[0]] = -1
+            A.append(hold)
+            B.append(0)
 
     print("storeConnectionsAtPoint:", storeConnectionsAtPoints)
     for a, x in enumerate(storeConnectionsAtPoints):
@@ -362,6 +410,10 @@ def solve(KirchoffVoltage):
     for c, comp in enumerate(components):
         if isinstance(comp, capacitor):
             comp.voltage = cmat[2*c]
+
+    for c, comp in enumerate(components):
+        if isinstance(comp, inductor):
+            comp.inductance = cmat[2*c]
 
     return 0
 
